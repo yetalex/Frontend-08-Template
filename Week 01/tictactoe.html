@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    #app {
+      display: flex;
+      position: relative;
+      flex-wrap: wrap;
+      width: 306px;
+      height: 306px;
+      background-color: #eee;
+    }
+
+    .over {
+      position: absolute;
+      width: 306px;
+      height: 306px;
+      background-color: rgba(0, 0, 0, .5);
+      color: yellow;
+      z-index: 2;
+      line-height: 306px;
+      font-size: 40px;
+      text-align: center;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #fff;
+      background-color: green;
+
+      line-height: 100px;
+      font-size: 50px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <script>
+    const pattern = [
+      [0, 1, 0],
+      [0, 0, 0],
+      [0, 0, 2]
+    ]
+
+    let player = 1 // 1: ❌    2: ⭕ 
+    const playerView = ['', '❌', '⭕ ']
+
+    // 1. 创建棋盘
+    function show() {
+      const board = document.getElementById('app')
+      board.innerHTML = ''
+
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          const cell = document.createElement('div')
+          cell.classList.add('cell')
+          cell.innerHTML = playerView[pattern[i][j]]
+          cell.addEventListener('click', move(i, j))
+          board.appendChild(cell)
+        }
+      }
+    }
+
+    // 2. 下棋
+    function move(i, j) {
+      return (e) => {
+        if (!e.target.innerHTML) {
+          pattern[i][j] = player  // 修改棋盘数据   NOTE: 先改数据还是先改样式？
+          e.target.innerHTML = playerView[player]  // 落子
+
+          if (check(pattern, player)) {
+            // 提示结果，并使得界面不能再点击
+            const app = document.getElementById('app'),
+              result = document.createElement('div')
+            result.classList.add('over')
+            result.innerHTML = `${playerView[player]} is winner.`
+            app.appendChild(result)
+          } else {
+            player = 3 - player // 换手
+            willWin(pattern, player)
+          }
+
+          return
+        }
+
+        alert('can not move here.')
+      }
+    }
+
+    // 3. 判断胜负
+    function check(pattern, currentPlayer) {
+      for (let i = 0; i < 3; i++) {
+        let win = true
+        for (let j = 0; j < 3; j++) {
+          if (pattern[i][j] != currentPlayer) {
+            win = false
+            break;
+          }
+        }
+
+        if (win) return true
+      }
+
+      for (let i = 0; i < 3; i++) {
+        let win = true
+        for (let j = 0; j < 3; j++) {
+          if (pattern[j][i] != currentPlayer) {
+            win = false
+            break;
+          }
+        }
+
+        if (win) return true
+      }
+
+      {
+        let win = true
+        for (let i = 0; i < 3; i++) {
+          if (pattern[i][i] != currentPlayer) {
+            win = false
+            break;
+          }
+        }
+        if (win) return true
+      }
+
+      {
+        let win = true
+        for (let i = 0; i < 3; i++) {
+          if (pattern[i][2 - i] != currentPlayer) {
+            win = false
+            break;
+          }
+        }
+        if (win) return true
+      }
+
+      return false
+    }
+
+    // 4. 增加预判功能
+    function clone(pattern) {
+      return JSON.parse(JSON.stringify(pattern))
+    }
+
+    function willWin(pattern, player) {
+      outer: for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          const clonePattern = clone(pattern) // 每次模拟落子都复制一次棋盘
+          if (!clonePattern[i][j]) {
+            clonePattern[i][j] = player  // 模拟落子
+
+            if (check(clonePattern, player)) { // 模拟检查
+              console.log(`${playerView[player]} will win.`)
+              break outer
+            }
+          }
+        }
+      }
+    }
+
+    show()
+  </script>
+</body>
+
+</html>
