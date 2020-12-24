@@ -72,26 +72,25 @@
     // 2. 下棋
     function move(i, j) {
       return (e) => {
-        if (!e.target.innerHTML) {
-          pattern[i][j] = player  // 修改棋盘数据   NOTE: 先改数据还是先改样式？
-          e.target.innerHTML = playerView[player]  // 落子
-
-          if (check(pattern, player)) {
-            // 提示结果，并使得界面不能再点击
-            const app = document.getElementById('app'),
-              result = document.createElement('div')
-            result.classList.add('over')
-            result.innerHTML = `${playerView[player]} is winner.`
-            app.appendChild(result)
-          } else {
-            player = 3 - player // 换手
-            willWin(pattern, player)
-          }
-
+        if (pattern[i][j]) {
+          alert('can not move here.')
           return
         }
 
-        alert('can not move here.')
+        pattern[i][j] = player  // 修改棋盘数据   NOTE: 先改数据还是先改样式？
+        e.target.innerHTML = playerView[player]  // 落子
+
+        if (check(pattern, player)) {
+          // 提示结果，并使得界面不能再点击
+          const app = document.getElementById('app'),
+            result = document.createElement('div')
+          result.classList.add('over')
+          result.innerHTML = `${playerView[player]} is winner.`
+          app.appendChild(result)
+        } else {
+          player = 3 - player // 换手
+          willWin(pattern, player)
+        }
       }
     }
 
@@ -151,8 +150,9 @@
       return JSON.parse(JSON.stringify(pattern))
     }
 
+    // 返回能获胜的point
     function willWin(pattern, player) {
-      outer: for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
           const clonePattern = clone(pattern) // 每次模拟落子都复制一次棋盘
           if (!clonePattern[i][j]) {
@@ -160,11 +160,13 @@
 
             if (check(clonePattern, player)) { // 模拟检查
               console.log(`${playerView[player]} will win.`)
-              break outer
+              return [i, j]
             }
           }
         }
       }
+
+      return null
     }
 
     show()
