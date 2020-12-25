@@ -45,13 +45,13 @@
 
   <script>
     const pattern = [
-      [0, 1, 0],
       [0, 0, 0],
-      [0, 0, 2]
+      [0, 0, 0],
+      [0, 0, 0]
     ]
 
-    let player = 1 // 1: ❌    2: ⭕ 
-    const playerView = ['', '❌', '⭕ ']
+    let player = 1 // 1: ⭕ , 2: ❌    
+    const playerView = ['', '⭕ ', '❌']
 
     // 1. 创建棋盘
     function show() {
@@ -63,7 +63,7 @@
           const cell = document.createElement('div')
           cell.classList.add('cell')
           cell.innerHTML = playerView[pattern[i][j]]
-          cell.addEventListener('click', move(i, j))
+          cell.addEventListener('click', () => move(i, j))
           board.appendChild(cell)
         }
       }
@@ -71,27 +71,46 @@
 
     // 2. 下棋
     function move(i, j) {
-      return (e) => {
-        if (pattern[i][j]) {
-          alert('can not move here.')
-          return
-        }
-
-        pattern[i][j] = player  // 修改棋盘数据   NOTE: 先改数据还是先改样式？
-        e.target.innerHTML = playerView[player]  // 落子
-
-        if (check(pattern, player)) {
-          // 提示结果，并使得界面不能再点击
-          const app = document.getElementById('app'),
-            result = document.createElement('div')
-          result.classList.add('over')
-          result.innerHTML = `${playerView[player]} is winner.`
-          app.appendChild(result)
-        } else {
-          player = 3 - player // 换手
-          willWin(pattern, player)
-        }
+      if (pattern[i][j]) {
+        alert('can not move here.')
+        return
       }
+
+      pattern[i][j] = player  // 修改棋盘数据
+
+      if (check(pattern, player)) {
+        // 提示结果，并使得界面不能再点击
+        const app = document.getElementById('app'),
+          result = document.createElement('div')
+        result.classList.add('over')
+        result.innerHTML = `${playerView[player]} is winner.`
+        app.appendChild(result)
+      } else {
+        player = 3 - player // 换手
+        show()
+        if (willWin(pattern, player)) console.log(`${playerView[player]} will win.`)
+
+        computerMove()
+      }
+    }
+
+    function computerMove() {
+      const { point } = bestChoise(pattern, player)
+      if (point) {
+        pattern[point[1]][point[0]] = player
+      }
+
+      show()
+
+      if (check(pattern, player)) {
+       const app = document.getElementById('app'),
+          result = document.createElement('div')
+        result.classList.add('over')
+        result.innerHTML = `${playerView[player]} is winner.`
+        app.appendChild(result) 
+      }
+
+      player = 3 - player
     }
 
     // 3. 判断胜负
@@ -154,13 +173,12 @@
     function willWin(pattern, player) {
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-          const clonePattern = clone(pattern) // 每次模拟落子都复制一次棋盘
-          if (!clonePattern[i][j]) {
+          if (!pattern[i][j]) {
+            const clonePattern = clone(pattern) // 每次模拟落子都复制一次棋盘
             clonePattern[i][j] = player  // 模拟落子
 
             if (check(clonePattern, player)) { // 模拟检查
-              console.log(`${playerView[player]} will win.`)
-              return [i, j]
+              return [j, i]  // 模拟x/y轴坐标
             }
           }
         }
@@ -169,7 +187,49 @@
       return null
     }
 
+    /*
+      最佳落子策略
+      1. 能赢的落子
+      2. 不会输
+      3. 落子之后，对方怎么下，我方不会输
+
+      返回落子位置point和输赢的结果判断 result: -1 输，0 和，1赢
+    */
+    function bestChoise(pattern, player) {
+      let p
+      if (p = willWin(pattern, player)) {
+        return {
+          point: p,
+          result: 1
+        }
+      }
+
+      let point = null,
+        result = -2
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (!pattern[i][j]) {
+            const clonePattern = clone(pattern) // 每次模拟落子都复制一次棋盘
+            clonePattern[i][j] = player  // 模拟落子
+            let r = bestChoise(clonePattern, 3 - player).result // 我落子之后，对方落子最佳结果
+
+            // -r > result的逻辑就是，-r是我的最好结果要是比前一个落子好的话，我就保存，直到全部落子位置检查完，得到的就是我要的最佳结果
+            if (-r > result) {
+              result = -r
+              point = [j, i]
+            }
+          }
+        }
+      }
+
+      return {
+        point,
+        result: point ? result : 0
+      }
+    }
+
     show()
+    // console.log(bestChoise(pattern, player))
   </script>
 </body>
 
