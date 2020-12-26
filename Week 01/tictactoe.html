@@ -63,14 +63,14 @@
           const cell = document.createElement('div')
           cell.classList.add('cell')
           cell.innerHTML = playerView[pattern[i][j]]
-          cell.addEventListener('click', () => move(i, j))
+          cell.addEventListener('click', () => userMove(i, j))
           board.appendChild(cell)
         }
       }
     }
 
     // 2. 下棋
-    function move(i, j) {
+    function userMove(i, j) {
       if (pattern[i][j]) {
         alert('can not move here.')
         return
@@ -111,6 +111,8 @@
       }
 
       player = 3 - player
+
+      console.log('user choise', bestChoise(pattern, player)) // user 最佳落子
     }
 
     // 3. 判断胜负
