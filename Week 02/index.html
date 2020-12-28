@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>寻路算法</title>
+  <style>
+    #container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 701px;
+    }
+    .cell {
+      line-height: 7px;
+      width: 6px;
+      height: 6px;
+      border-style: solid;
+      border-color: white;
+      border-width: 0 1px 1px 0;
+      vertical-align: top;
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div>
+    <button onclick="localStorage.setItem('mapData', JSON.stringify(map))">save</button>
+    <button onclick="resetMap()">reset</button>
+  </div>
+  <script>
+    const app = document.getElementById('container')
+    let getMap = () => localStorage.getItem('mapData') ? JSON.parse(localStorage.getItem('mapData')) : Array(10000).fill(0)
+    let map = getMap()
+    let isMousedown = false
+    let clear = false
+
+    function resetMap() {
+      map = Array(10000).fill(0)
+      for (let i=0; i<100; i++) {
+        for (let j=0; j<100; j++) {
+          app.children[j * 100 + i].style.backgroundColor = map[j * 100 + i] ? '#000' : '#ccc'
+        }
+      }
+    }
+
+    function init() {
+      for (let i = 0; i < 100; i++) {
+        for (let j = 0; j < 100; j++) {
+          const cell = document.createElement('div')
+          cell.classList.add('cell')
+
+          if (map[i * 100 + j]) {
+            cell.style.backgroundColor = '#000';
+          }
+
+          cell.addEventListener('mousemove', () => {
+            if (isMousedown) {
+              map[i * 100 + j] = clear ? 0 : 1
+              cell.style.backgroundColor = clear ? '#ccc' : '#000'
+            }
+          })
+          cell.addEventListener('mousedown', (e) => {
+            isMousedown = true
+            if (e.button === 0) clear = false
+            if (e.button === 2) clear = true
+          })
+          cell.addEventListener('contextmenu', (e) => e.preventDefault())
+          cell.addEventListener('mouseup', () => isMousedown = false)
+
+          app.appendChild(cell)
+        }
+
+      }
+    }
+
+    init()
+    
+  </script>
+</body>
+</html>
