@@ -32,18 +32,18 @@
   </div>
   <script>
     const app = document.getElementById('container')
-    let getMap = () => localStorage.getItem('mapData') ? JSON.parse(localStorage.getItem('mapData')) : Array(10000).fill(0)
-    let map = getMap()
+    let map = localStorage.getItem('mapData') ? JSON.parse(localStorage.getItem('mapData')) : Array(10000).fill(0)
     let isMousedown = false
     let clear = false
 
     function resetMap() {
-      map = Array(10000).fill(0)
+      const map = Array(10000).fill(0)
       for (let i=0; i<100; i++) {
         for (let j=0; j<100; j++) {
           app.children[j * 100 + i].style.backgroundColor = map[j * 100 + i] ? '#000' : '#ccc'
         }
       }
+      // localStorage.setItem('mapData', JSON.stringify(map))
     }
 
     function init() {
