@@ -83,8 +83,14 @@
       })
     }
 
+    function showPoint([x, y], color) {
+      app.children[y * 100 + x].style.backgroundColor = color
+    }
+
     // 广度优先的寻址算法
     async function path(map, start, end) {
+      // 显示一下结束这个点
+      showPoint(end, 'red')
       let queue = [start] // 这个就是要去查找的集合，算法核心
 
       // 寻找周围没有障碍或者未找过的点，没有找到就return,找到就插入到queue队列中
