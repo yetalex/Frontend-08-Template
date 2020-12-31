@@ -88,26 +88,31 @@
     }
 
     // 广度优先的寻址算法
-    async function path(map, start, end) {
+    async function findPath(map, start, end) {
       // 显示一下结束这个点
       showPoint(end, 'red')
       let queue = [start] // 这个就是要去查找的集合，算法核心
+      let temp = null
 
       // 寻找周围没有障碍或者未找过的点，没有找到就return,找到就插入到queue队列中
       function insert(x, y) {
         if (x < 0 || y >= 100 || x >= 100 || y < 0) return
         if (map[y * 100 + x]) return // 该点有值
 
-        map[y * 100 + x] = 2 // 格子是空的，该位置值为0；有墙，值为1；可以走，值设置为2
+        // map[y * 100 + x] = 2 // 格子是空的，该位置值为0；有墙，值为1；可以走，值设置为2
+        // const sourcePoint = queue.slice(0, 1) // 不改变queue的情况下，拿到queue[0]
+        map[y * 100 + x] = temp  // 保存
         queue.push([x, y])
       }
 
       while (queue.length > 0) {
         let [i, j] = queue.shift()
+        temp = [i, j]
         await sleep(30)
         app.children[j*100 + i].style.backgroundColor = 'green'
         if (i === end[0] && j === end[1]) {
           // 找到了
+          path(map, start, end)
           return true
         }
 
@@ -119,6 +124,20 @@
       }
 
       return false
+    }
+
+    async function path(map, start, end) {
+      let [x, y] = end
+      showPoint(end, 'red')
+      while (typeof map[y * 100 + x] === 'object') { // TODO: 需要修改
+        [x, y] = map[y * 100 + x]
+        await sleep(30)
+        showPoint([x, y], 'red')
+
+        if (x === start[0] && y === start[1]) {
+          break;
+        }
+      }
     }
     
   </script>
