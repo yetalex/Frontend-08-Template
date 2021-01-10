@@ -35,16 +35,26 @@
     }
   }
 
-  for (let token of tokenize('1024 + 10 * 25')) {
-    console.log(token)
+  let tokens = []
+  for (let token of tokenize('10 * 5 / 6')) {
+    if (token.type !== 'Whitespace' && token.type !== 'LineTerminator') {
+      tokens.push(token)
+    }
   }
 
   /**
-   * 四则运算 BNF范式语法
+   * 四则运算 BNF范式语法 定义
    * <AdditiveExpression> ::=         
-   * <MultiplicativeExpression>
-   * |<AdditiveExpression><+><MultiplicativeExpression>
-   * |<AdditiveExpression><-><MultiplicativeExpression>
+   *   <MultiplicativeExpression>
+   *   |<AdditiveExpression><+><MultiplicativeExpression>
+   *   |<AdditiveExpression><-><MultiplicativeExpression>
+   * 
+   * 
+    <MultiplicativeExpression> ::=
+      <Number>
+      |<MultiplicativeExpression><*><Number>
+      |<MultiplicativeExpression></><Number>
+   * 
    */
 
   // LL语法分析，往左规约
@@ -72,11 +82,11 @@
     if (
       source[0].type === 'MultiplicativeExpression' &&
       source[1] &&
-      source[1].type === '*'
+      /^\*|\/$/.test(source[1].type)
     ) {
       let node = {
         type: 'MultiplicativeExpression',
-        operator: '*',
+        operator: source[1].type,
         children: []
       }
 
@@ -87,28 +97,28 @@
     }
 
 
-    if (
-      source[0].type === 'MultiplicativeExpression' &&
-      source[1] &&
-      source[1].type === '/'
-    ) {
-      let node = {
-        type: 'MultiplicativeExpression',
-        operator: '/',
-        children: []
-      }
+    // if (
+    //   source[0].type === 'MultiplicativeExpression' &&
+    //   source[1] &&
+    //   source[1].type === '/'
+    // ) {
+    //   let node = {
+    //     type: 'MultiplicativeExpression',
+    //     operator: '/',
+    //     children: []
+    //   }
 
-      node.children.push(source.shift(), source.shift(), source.shift())
-      source.unshift(node)
+    //   node.children.push(source.shift(), source.shift(), source.shift())
+    //   source.unshift(node)
 
-      return MultiplicativeExpression(source)
-    }
+    //   return MultiplicativeExpression(source)
+    // }
 
     if (source[0].type === 'MultiplicativeExpression') return source[0]
 
     return MultiplicativeExpression(source)
   }
 
-  MultiplicativeExpression(source)
+  console.log(MultiplicativeExpression(tokens))
 
 </script>
