@@ -1,0 +1,114 @@
+<script>
+
+  const regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g
+
+  const dictionary = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-']
+
+  function* tokenize(source) {
+    let result = null
+    let lastIndex = 0
+    while (true) {
+      lastIndex = regexp.lastIndex // 返回紧跟上一次搜索结果之后的位置
+      result = regexp.exec(source)
+
+      if (!result) break;
+
+      // 如果匹配的出来结果，但是中间多了不认识的字符，那就出错了，需要break
+      if ((regexp.lastIndex - lastIndex) > result[0].length) break;
+
+      let token = {
+        type: null,
+        value: null
+      }
+
+      for (let i = 1; i < dictionary.length; i++) {
+        if (result[i]) {
+          token.type = dictionary[i - 1]
+        }
+      }
+      token.value = result[0]
+      yield token
+    }
+
+    yield {
+      type: 'EOF'
+    }
+  }
+
+  for (let token of tokenize('1024 + 10 * 25')) {
+    console.log(token)
+  }
+
+  /**
+   * 四则运算 BNF范式语法
+   * <AdditiveExpression> ::=         
+   * <MultiplicativeExpression>
+   * |<AdditiveExpression><+><MultiplicativeExpression>
+   * |<AdditiveExpression><-><MultiplicativeExpression>
+   */
+
+  // LL语法分析，往左规约
+  function Expression(tokens) {
+
+  }
+
+  // 加减法 产生式
+  function AdditiveExpression(source) {
+
+  }
+
+  // 乘除法 产生式
+  function MultiplicativeExpression(source) {
+    if (source[0].type === 'Number') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        children: [source[0]]
+      }
+
+      source[0] = node  // source[0]就已经式处理过token了
+      return MultiplicativeExpression(source) // 递归处理下一个token
+    }
+
+    if (
+      source[0].type === 'MultiplicativeExpression' &&
+      source[1] &&
+      source[1].type === '*'
+    ) {
+      let node = {
+        type: 'MultiplicativeExpression',
+        operator: '*',
+        children: []
+      }
+
+      node.children.push(source.shift(), source.shift(), source.shift())
+      source.unshift(node)
+
+      return MultiplicativeExpression(source)
+    }
+
+
+    if (
+      source[0].type === 'MultiplicativeExpression' &&
+      source[1] &&
+      source[1].type === '/'
+    ) {
+      let node = {
+        type: 'MultiplicativeExpression',
+        operator: '/',
+        children: []
+      }
+
+      node.children.push(source.shift(), source.shift(), source.shift())
+      source.unshift(node)
+
+      return MultiplicativeExpression(source)
+    }
+
+    if (source[0].type === 'MultiplicativeExpression') return source[0]
+
+    return MultiplicativeExpression(source)
+  }
+
+  MultiplicativeExpression(source)
+
+</script>

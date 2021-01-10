@@ -1,0 +1,42 @@
+<script>
+
+  const regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g
+
+  const dictionary = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-']
+
+  function* tokenize(source) {
+    let result = null
+    let lastIndex = 0
+    while (true) {
+      lastIndex = regexp.lastIndex // 返回紧跟上一次搜索结果之后的位置
+      result = regexp.exec(source)
+
+      if (!result) break;
+
+      // 如果匹配的出来结果，但是中间多了不认识的字符，那就出错了，需要break
+      if ( (regexp.lastIndex - lastIndex) > result[0].length) break;
+
+      let token = {
+        type: null,
+        value: null
+      }
+
+      for (let i = 1; i < dictionary.length; i++) {
+        if (result[i]) {
+          token.type = dictionary[i - 1]
+        }
+      }
+      token.value = result[0]
+      yield token
+    }
+
+    yield {
+      type: 'EOF'
+    }
+  }
+
+  for ( let token of tokenize('1024 + 10 * 25')) {
+    console.log(token)
+  }
+
+</script>
