@@ -36,7 +36,7 @@
   }
 
   let tokens = []
-  for (let token of tokenize('10 * 5 / 6')) {
+  for (let token of tokenize('3 + 10 * 5 / 6')) {
     if (token.type !== 'Whitespace' && token.type !== 'LineTerminator') {
       tokens.push(token)
     }
@@ -58,13 +58,62 @@
    */
 
   // LL语法分析，往左规约
-  function Expression(tokens) {
+  function Expression(source) {
+    if (
+      source[0].type === 'AdditiveExpression' &&
+      source[1] &&
+      source[1].type === 'EOF'
+    ) {
+      let node = {
+        type: 'Expression',
+        children: [source.shift(), source.shift()]
+      }
 
+      source.unshift(node)
+      return node
+    }
+
+    AdditiveExpression(source)
+    return Expression(source)
   }
 
   // 加减法 产生式
   function AdditiveExpression(source) {
+    if (source[0].type === 'MultiplicativeExpression') {
+      let node = {
+        type: 'AdditiveExpression',
+        children: [source[0]]
+      }
+      source[0] = node
+      return AdditiveExpression(source)
+    }
 
+    if (
+      source[0].type === 'AdditiveExpression' &&
+      source[1] &&
+      /^\+|\-$/.test(source[1].type)
+    ) {
+      let node = {
+        type: 'AdditiveExpression',
+        operator: source[1].type,
+        children: []
+      }
+
+      node.children.push(source.shift(), source.shift())
+      /* 这一句比较关键，等于是需要把source第三个之后的有效token进行一次MultiplicativeExpression()，规约得到一个MultiplicativeExpression token来满足 加减法的定义: <AdditiveExpress><+><MultiplicativeExpression>，
+      (处理非终结符)
+      */
+      MultiplicativeExpression(source)
+      node.children.push(source.shift())
+      source.unshift(node)
+      return AdditiveExpression(source)
+    }
+
+    if (source[0].type === 'AdditiveExpression') return source[0]
+
+    // 先乘除，后加减；Number看成特殊的乘法
+    MultiplicativeExpression(source)
+    return AdditiveExpression(source)
   }
 
   // 乘除法 产生式
@@ -119,6 +168,6 @@
     return MultiplicativeExpression(source)
   }
 
-  console.log(MultiplicativeExpression(tokens))
+  console.log(Expression(tokens))
 
 </script>
