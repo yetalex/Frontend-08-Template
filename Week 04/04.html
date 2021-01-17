@@ -1,0 +1,54 @@
+<script>
+  // 通配符  * 任意数量的字符；? 表示一个任意字符
+  // ab *abc a?d  三段匹配
+  function find(source, pattern) {
+    // 0. 找星号的数量
+    let starCount = 0
+    for (let i = 0; i < pattern.length; i++) {
+      if (pattern[i] === '*') starCount++
+    }
+
+    // 如果模式里没有*号，无论有没有问号，字符串长度需要一样
+    if (starCount === 0) {
+      for (let i = 0; i < pattern.length; i++) {
+        if (pattern[i] !== source[i] && pattern[i] !== '?') return false
+      }
+      return true
+    }
+
+    let i = 0
+    let lastIndex = 0
+
+    // 1. 匹配第一个*号前的字符串
+    for (i = 0; pattern[i] !== '*'; i++) {
+      if (pattern[i] !== source[i] && pattern[i] !== '?') return false
+    }
+
+    lastIndex = i  // 第一个*号的位置
+
+    // 2. 匹配中间这一段*号模式
+    for (let p = 0; p < starCount - 1; p++) {
+      i++
+      let subPattern = ''  // *ab   找到这个ab
+      while(pattern[i] !== '*') {
+        subPattern += pattern[i]
+        i++
+      }
+
+      // TODO: 这里可以使用KMP算法试试
+      let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g')
+      reg.lastIndex = lastIndex  // 从lastIndex位置开始匹配
+
+      if (!reg.exec(source)) return false
+      lastIndex = reg.lastIndex
+    }
+
+    // 3. 最后一段*号模式，从后往前，匹配一下*之后的字符就可以了
+    for (let j = 0; j <= source.length - lastIndex && pattern[pattern.length -j] !== '*'; j++) {
+      if (pattern[pattern.length - j] !== source[source.length -j]
+        && pattern[pattern.length -j] !== '?') return false
+    }
+
+    return true
+  }
+</script>

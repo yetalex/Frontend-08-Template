@@ -1,0 +1,60 @@
+<script>
+  /*
+    字典树字符串匹配，大量字符的分析和统计，应用场景比如搜索关键词次数统计
+  */
+  let $ = Symbol('$') //不可重复
+  class Trie {
+    constructor() {
+      this.root = Object.create(null)  // 一个干净的对象
+    }
+
+    insert(word) {
+      let node = this.root
+      for (let i = 0; i < word.length; i++) {
+        if (!node[word[i]]) {
+          node[word[i]] = Object.create(null)
+        }
+        node = node[word[i]]
+      }
+
+      // 处理完字符串后，在这个串末尾添加一个计数器，计数器已经添加则+1
+      if(!($ in node)) node[$] = 0
+      node[$]++
+    }
+
+    most() {
+      let max = 0
+      let maxWord = null
+      let visit = (node, word) => {
+        if (node[$] && node[$] > max) {
+          max = node[$]
+          maxWord = word
+        }
+
+        for(let p in node) {
+          visit(node[p], word + p)
+        }
+      }
+      visit(this.root, '')
+      console.log(maxWord, max)
+    }
+  }
+
+  // 利用String.fromCharCode ASCII码来生成指定长度随机字符串
+  function randomWord(length) {
+    let s = ''
+    for (let i = 0; i < length; i++) {
+      s += String.fromCharCode(Math.random() * 26 + 'a'.charCodeAt(0))
+    }
+
+    return s
+  }
+
+  let trie = new Trie()
+
+  for (let i = 0; i < 100000; i++) {
+    trie.insert(randomWord(4)) // 插入10万个短字符串
+  }
+
+
+</script>
