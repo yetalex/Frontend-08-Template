@@ -24,6 +24,7 @@
       console.log(table)
     }
 
+    // 2. 匹配
     {
       let i = 0, j = 0
       while(i < source.length) {
@@ -41,11 +42,8 @@
       }
       return false
     }
-    
-
-    // 2. 匹配
   }
 
-  console.log(kmp('123abcdabceabcd', 'abcdabceabcd'))
+  console.log(kmp('abcdabceaabcdabce', 'abcdabceabcd'))
   // TODO: abcdabceabcd   这个pattern的table值多了一位？
 </script>
