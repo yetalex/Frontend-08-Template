@@ -1,0 +1,80 @@
+<script>
+  let obj = {
+    a: {
+      c: 10
+    },
+    b: 2
+  }
+  let callbacks = new Map(),
+    reactivities = new Map(),
+    usedReactivities = []
+
+  let po = reactive(obj)
+
+  effect(() => {
+    console.log('callback>>>', po.a.c)
+  })
+
+  function effect(callback) {
+    // callbacks.push(callback)
+    usedReactivities = []
+    callback()
+    console.log(usedReactivities)
+    
+    // 每个已经监听的对象和属性，绑定了多少个callback
+    for(let reactivity of usedReactivities) {
+      if (!callbacks.has(reactivity[0])) {
+        callbacks.set(reactivity[0], new Map())
+      }
+      if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
+        callbacks.get(reactivity[0]).set(reactivity[1], [])
+      }
+
+      // 为reactivity[0]这个对象的reactivity[1]这个属性，添加handler(监听回调函数)
+      callbacks.get(reactivity[0]).get(reactivity[1]).push(callback)
+    }
+  }
+
+  function reactive(obj) {
+    if (reactivities.has(obj)) {
+      return reactivities.get(obj)
+    }
+
+    let proxy =  new Proxy(obj, {
+      get(obj, prop) {
+        // 调用过prop就加入监听列表
+        usedReactivities.push([obj, prop])
+
+        // 优化对象属性的递归订阅
+        if (typeof obj[prop] === 'object') {
+          return reactive(obj[prop])
+        }
+        return obj[prop]
+      },
+      set(obj, prop, value) {
+        console.log('setter>>>', obj[prop], value)
+        obj[prop] = value
+        // 运行属性设置会影响的函数数组
+        // for(let callback of callbacks) { // 所有回调函数
+        //   callback()
+        // }
+        // 调整为运行当前设置的属性的监听回调函数，达到所谓响应式
+        if(callbacks.get(obj)
+          && callbacks.get(obj).get(prop)) {
+            for(let callback of callbacks.get(obj).get(prop)) {
+              callback()
+            }
+          }
+        return obj[prop]
+      }
+    })
+
+    reactivities.set(obj, proxy)
+    return proxy
+  }
+
+  
+
+  
+
+</script>
