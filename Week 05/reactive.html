@@ -1,9 +1,16 @@
+<input type="range" id="r" min="0" max="255">
+<input type="range" id="g" min="0" max="255">
+<input type="range" id="b" min="0" max="255">
+<div id="color" style="width: 100px; height: 100px; border:1px solid #ccc;"></div>
 <script>
   let obj = {
-    a: {
-      c: 10
-    },
-    b: 2
+    // a: {
+    //   c: 10
+    // },
+    // b: 2
+    r: 1,
+    g: 1,
+    b: 1
   }
   let callbacks = new Map(),
     reactivities = new Map(),
@@ -12,14 +19,35 @@
   let po = reactive(obj)
 
   effect(() => {
-    console.log('callback>>>', po.a.c)
+    // console.log('callback>>>', po.a.c)
+    document.getElementById('r').value = po.r
+  })
+  effect(()=> {
+    document.getElementById('g').value= po.g
+  })
+  effect(() => {
+    document.getElementById('b').value = po.b
+  })
+  // 双向绑定
+  document.getElementById('r').addEventListener('input', e => po.r = e.target.value)
+  document.getElementById('g').addEventListener('input', e => po.g = e.target.value)
+  document.getElementById('b').addEventListener('input', e => po.b = e.target.value)
+
+  // 颜色的effect
+  effect(() => {
+    document.getElementById('color').style.backgroundColor = `rgb(${po.r}, ${po.g}, ${po.b})`
   })
 
+  /**
+   * effect 订阅者
+   * reactive.set 代理  消费者
+   * reactive.get 监听
+   **/
   function effect(callback) {
     // callbacks.push(callback)
     usedReactivities = []
     callback()
-    console.log(usedReactivities)
+    // console.log(usedReactivities)
     
     // 每个已经监听的对象和属性，绑定了多少个callback
     for(let reactivity of usedReactivities) {
@@ -52,7 +80,7 @@
         return obj[prop]
       },
       set(obj, prop, value) {
-        console.log('setter>>>', obj[prop], value)
+        // console.log('setter>>>', obj[prop], value)
         obj[prop] = value
         // 运行属性设置会影响的函数数组
         // for(let callback of callbacks) { // 所有回调函数
