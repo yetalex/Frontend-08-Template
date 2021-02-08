@@ -54,3 +54,26 @@ var o = {
 - 微任务：Promise产生
 
 ## JS结构化 （JS函数调用）
+
+- JSContext 执行上下文
+- Realm  每个执行环境都会有一个Realm用来存储内置对象
+
+### JavaScript引擎中的内置对象
+
+根据mozilla.org中的参考，[https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects]
+
+- Value properties
+- Function properties
+- Fundamental objects
+- Error objects
+- Numbers and dates
+- Text processing
+- Indexed collections
+- Keyed collections
+- Structrued data
+- Control abstraction objects
+- Refection
+- Internationalization
+- WebAssembly
+- Other
+  - arguments
