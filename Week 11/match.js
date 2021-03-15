@@ -52,7 +52,9 @@ function match(selector, element) {
     for(let rule of rules) {
       if (!el) return false     // el元素不存在
       if (!matchCombinedRule(rule, el)) return false // 当前元素不匹配rule规则
-      el = el.previousSibling
+      while (el = el.previousSibling) {  // 查找上一个元素节点
+        if (el.nodeType === 1) break;
+      }
     }
     return true
   } else if ((rules = selector.split('~')).length > 1) {
@@ -63,7 +65,7 @@ function match(selector, element) {
       let rule = rules[i]
       let matched = false
       while (el = el.previousSibling) {
-        if (matchCombinedRule(rule, el)) {
+        if (el.nodeType === 1 && matchCombinedRule(rule, el)) {
           matched = true
           break;
         }
