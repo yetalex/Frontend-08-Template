@@ -13,7 +13,7 @@ function match(selector, element) {
 
   // 1. > 分割，从右到左匹配
   {
-    const rules = selector.split('')
+    const rules = selector.split('>')
   }
   // 2. 空格分割，从右到左匹配
   {
@@ -26,13 +26,42 @@ function match(selector, element) {
 
 /**
  * 处理复合选择器
+ * 处理逻辑：
+ *   1. 先解析rule
+ *   2. 元素和解析好的结果进行匹配，有一个匹配不上就false了
  * @param {*} rule 
  */
-function matchCombinedRule(rule) {
-  const re1 = /^[A-Za-z]*/g,                       // 匹配元素
-  re2 = /#[A-Za-z0-9$_-]+/g,                       // 匹配id
-  re3 = /\.[A-Za-z0-9$_-]+/g,                      // 匹配class
-  re4 = /\[([A-Za-z0-9_-]+)=([A-Za-z0-9_-]+)\]/g   // 匹配属性
+function matchCombinedRule(rule, el) {
+  const re1 = /#[A-Za-z0-9$_-]+/g,                    // 解析id
+    re2 = /\.[A-Za-z0-9$_-]+/g,                       // 解析class
+    re3 = /\[([A-Za-z0-9_-]+)=([A-Za-z0-9_-]+)\]/g,   // 解析属性
+    re4 = /^[A-Za-z]+/g                               // 解析元素
+
+
+  const result1 = rule.match(re1),
+      result2 = rule.match(re2),
+      result4 = rule.match(re4)
+
+  if (result1) {
+    // rule存在id
+    if (result1[0].replace('#', '') !== el.getAttribute('id')) return false
+  }
+
+  if (result2) {
+    // rule存在class，有一个class没有，就算不匹配
+    for(let i=0; i < result2.length; i++) {
+      if (el.getAttribute('class').indexOf(result2[i].replace('.', '')) === -1) return false
+    }
+  }
+
+  // rule存在属性选择器 [attr=value]
+  let array
+  while((array = re3.exec(rule)) !== null) {
+    if(el.getAttribute(array[1]) !== array[1]) return false
+  }
+
+
+  return true
 }
 
 match('div #id.class', document.getElementById('id'))
