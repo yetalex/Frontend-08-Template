@@ -109,10 +109,20 @@ function matchCombinedRule(rule, el) {
   }
 
   // rule存在属性选择器 [attr=value]
-  let array
-  while((array = re3.exec(rule)) !== null) {
-    if(el.getAttribute(array[1]) !== array[1]) return false
+  {
+    let array
+    while ((array = re3.exec(rule)) !== null) {
+      if (el.getAttribute(array[1]) !== array[1]) return false
+    }
   }
+
+  {
+    let array
+    while ((array = re4.exec(rule)) !== null) {
+      if (el.tagName.toLowerCase() !== array[1]) return false
+    }
+  }
+  
 
 
   return true
