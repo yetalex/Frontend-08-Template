@@ -1,15 +1,66 @@
 function createElement(type, attributes, ...children) {
-  let element = document.createElement(type)
+  let element
+  if (typeof type === 'string')
+    element = new ElementWrapper(type)
+  else
+    element = new type
+
   for(let name in attributes) {
     element.setAttribute(name, attributes[name])
   }
   for(let child of children) {
     if (typeof child === 'string') {
-      child = document.createTextNode(child)
+      child = new TextWrapper(child)
     }
     element.appendChild(child)
   }
   return element
+}
+
+// 处理正常html元素
+class ElementWrapper {
+  constructor(type) {
+    this.root = document.createElement(type)
+  }
+  setAttribute(name, value) {
+    this.root.setAttribute(name, value)
+  }
+  appendChild(child) {
+    child.mountTo(this.root)
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root)
+  }
+}
+
+class TextWrapper {
+  constructor(content) {
+    this.root = document.createTextNode(content)
+  }
+  setAttribute(name, value) {
+    this.root.setAttribute(name, value)
+  }
+  appendChild(child) {
+    child.mountTo(this.root)
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root)
+  }
+}
+
+class Div {
+  constructor() {
+    this.root = document.createElement('div')
+  }
+  setAttribute(name, value) {
+    this.root.setAttribute(name, value)
+  }
+  appendChild(child) {
+    child.mountTo(this.root)
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root)
+  }
 }
 
 let a = <div id="a">
@@ -17,8 +68,6 @@ let a = <div id="a">
   <span>b</span>
   <span>c</span>
 </div>
-document.body.appendChild(a)
+// document.body.appendChild(a)
 
-// 文本节点
-let b = <div id="b">Hello World!</div>
-document.body.appendChild(b)
+a.mountTo(document.body)
