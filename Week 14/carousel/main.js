@@ -17,6 +17,24 @@ class Carousel extends Component {
       this.root.appendChild(child)
     }
 
+    this.root.addEventListener('mousedown', event => {
+      console.log('mousedown')
+
+      let move = event => {
+        console.log('mousemove')
+      }
+
+      let up = event => {
+        console.log('mouseup', this)
+        document.removeEventListener('mousemove', move)
+        document.removeEventListener('mouseup', up)
+      }
+
+      document.addEventListener('mousemove', move)
+      document.addEventListener('mouseup', up)
+    })
+
+    /*
     // 考虑当前的图和下一站图是什么就可以模拟出一直下一张的效果
     let currentIndex = 0  
     setInterval(() => {
@@ -40,6 +58,7 @@ class Carousel extends Component {
       //   child.style.transform = `translateX(-${current * 100}%)`
       // }
     }, 3000);
+    */
 
     return this.root
   }
