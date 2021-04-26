@@ -5,11 +5,30 @@ module.exports = class extends Generator {
     super(args, opts)
   }
 
-  method1() {
-    this.log('method 1 just ran')
+  initPackage() {
+    const pkgJson = {
+      devDependencies: {
+        eslint: '^3.15.0'
+      },
+      dependencies: {
+        react: '^16.2.0'
+      }
+    }
+
+    this.fs.extendJSON(this.destinationPath('package.json'), pkgJson)
   }
 
-  method2() {
-    this.log('method 2 just ran')
+  installingLodash() {
+    this.npmInstall(['lodash'], { 'save-dev': true })
+
+    // this.npmInstall() is not a function错误
+  }
+
+  prompting() {
+    this.fs.copyTpl(
+      this.templatePath('t.html'),
+      this.destinationPath('public/index.html'),
+      { title: 'Templating with Yeoman' }
+    )
   }
 }
