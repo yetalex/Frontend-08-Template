@@ -1,0 +1,19 @@
+{
+  "name": "vue demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vue-loader": "15.9.6",
+    "webpack": "5.35.1"
+  },
+  "dependencies": {
+    "vue": "2.6.12"
+  }
+}
